@@ -1,0 +1,80 @@
+// VideoShrink Database Schema
+// Supports both PostgreSQL and SQLite
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String?  // Optional for guest mode
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  jobs Job[]
+
+  @@map("users")
+}
+
+model Job {
+  id          Int       @id @default(autoincrement())
+  userId      Int?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // File information
+  inputFile   String    // Path to original uploaded file
+  outputFile  String?   // Path to compressed output file
+  fileName    String    // Original filename
+  fileSize    Int       // Original file size in bytes
+  outputSize  Int?      // Compressed file size in bytes
+
+  // Job configuration
+  preset      String?   // Compression preset (high/medium/low)
+  codec       String?   // Video codec (h264/h265)
+  targetSize  Float?    // Target size percentage (e.g., 0.5 for 50%)
+  crf         Int?      // Constant Rate Factor
+  bitrate     String?   // Target bitrate
+  resolution  String?   // Target resolution (e.g., "1920x1080")
+
+  // Job status
+  status      String    @default("pending") // pending, processing, completed, failed
+  progress    Float     @default(0.0)       // 0.0 to 100.0
+  error       String?   // Error message if failed
+
+  // Metadata
+  thumbnailPath String? // Path to generated thumbnail
+  previewPath   String? // Path to preview video
+  duration      Float?  // Video duration in seconds
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  startedAt   DateTime? // When job processing started
+  completedAt DateTime? // When job processing completed
+
+  @@map("jobs")
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model FileUpload {
+  id          Int      @id @default(autoincrement())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  path        String
+  uploadedAt  DateTime @default(now())
+  expiresAt   DateTime? // For temporary file cleanup
+
+  @@map("file_uploads")
+  @@index([expiresAt])
+}

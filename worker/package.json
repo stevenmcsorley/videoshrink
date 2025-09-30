@@ -1,0 +1,35 @@
+{
+  "name": "videoshrink-worker",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage"
+  },
+  "keywords": [
+    "video",
+    "compression",
+    "ffmpeg",
+    "worker"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "VideoShrink worker service for video compression jobs",
+  "dependencies": {
+    "@prisma/client": "^6.16.3",
+    "@types/node": "^24.6.0",
+    "bullmq": "^5.59.0",
+    "ioredis": "^5.8.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.4"
+  }
+}

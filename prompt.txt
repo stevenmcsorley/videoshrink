@@ -1,0 +1,156 @@
+Task — create a tracked project in our Jira clone from the PRD
+
+Read these first (required):
+
+The Product Requirements Document (PRD) titled “VideoShrink (working name)” (the full PRD you were just shown).
+
+The Style Guide for our project UI and repo conventions.
+
+API.md — the API spec for the Jira clone (this describes how to create projects, epics, issues, comments, labels, sprints, attachments, etc).
+
+Goal:
+Using the PRD as the single source of truth, create a full project plan inside our Jira clone by calling the API endpoints described in API.md. The plan must be complete and actionable so an engineering team can pick up tasks immediately and start building. All work, artifacts, and docs must be stored/linked in the project and a directory inside the repo so they are reproducible and discoverable.
+
+What to create (must do):
+
+Project container
+
+Create a project named VideoShrink (use slug videoshrink). Include short description, components: frontend, backend, worker, infra, docs, qa.
+
+Set project type to Software and default board to a Kanban board (or Scrum if API.md requires sprints).
+
+Epics / Milestones (minimum)
+
+EPIC-UX — Upload + Basic UX (upload UI, drag/drop, progress).
+
+EPIC-BACKEND — Backend API + storage + DB.
+
+EPIC-WORKER — FFmpeg worker + queue integration.
+
+EPIC-OPS — Docker Compose, infra, TLS, health & metrics.
+
+EPIC-E2E — Testing, E2E Playwright and CI.
+
+EPIC-DOCS — Docs, Quickstart, FFmpeg tuning guide.
+
+Top-level stories / issues for each epic. For each story:
+
+Create a concise title and short summary (one-sentence purpose).
+
+Attach the relevant PRD sections as an attachment or a link to the PRD stored in the project docs.
+
+Provide ACCEPTANCE CRITERIA (clear pass/fail conditions).
+
+Provide an Implementation checklist (subtasks).
+
+Provide an Estimate (realistic — measured in hours; do not use 5–10 minute tiny estimates; use short, realistic developer tasks e.g., 4h, 8h, 1d, 2d).
+
+Give a priority (Blocker, High, Medium, Low) and component.
+
+Assign placeholders for roles (e.g., @frontend-dev, @backend-dev, @devops) — if users don’t exist, create the issue unassigned but add a comment tagging the role.
+
+Subtasks — break stories into clear tasks with owners and time estimates. Examples:
+
+Frontend: scaffolding (Vite + React + Tailwind v2.2.x) — 1d
+
+Frontend: upload component + chunked upload support — 2d
+
+Backend: upload endpoint + DB schema + simple auth — 2d
+
+Worker: Dockerfile with ffmpeg + basic worker to run one ffmpeg command — 1d
+
+Infra: docker-compose local dev w/ redis, postgres, minio, nginx — 1d
+
+Tests: Playwright E2E basic upload→compress→download test — 2d
+
+Docs: README quickstart + Docker Compose examples — 4h
+
+Technical tasks — create issues for:
+
+FFmpeg command generator (TS library) that supports CRF and target-size % with tests.
+
+Storage abstraction (local vs S3/MinIO).
+
+Real-time progress (SSE or WebSocket) design & implementation task.
+
+Metrics & monitoring (Prometheus endpoints, Grafana dashboard task).
+
+Security tasks (HTTPS, env secrets, quotas).
+
+DevOps & Docker tracking
+
+Create an infra issue that requires: docker-compose.yml, .env.example, infra/README.md and a deploy section.
+
+Create a docker artifact task: place a planning folder in the repo (e.g., /infra/planning/) that includes:
+
+project-plan.json — machine-readable export of all created issues/epics (use API create result data).
+
+docker-compose-planning.yml — a composition snippet that documents the services and volumes used for the project plan (not the built app).
+
+README.md that explains how to recreate the project board (API calls, tokens).
+
+Add a task to make a Docker image that contains a small CLI scripts/create_issues_from_plan.sh (or node script) which uses the API to re-create project issues from project-plan.json — estimate 1d.
+
+Automations & labels
+
+Create labels: feature, bug, chore, infra, urgent, blocked, security, help-wanted.
+
+Create an automation rule: when an issue moves to Done, add comment ✅ Marking done — ensure artifacts are pushed to /outputs and PR linked.
+
+Create template comments for reviewers (PR checklist).
+
+Documentation & artifacts
+
+Create a DOCS issue that requires: Quickstart.md, FFmpeg-guide.md (how to choose CRF, two-pass vs single-pass, target-percent math), Tailwind-setup.md (v2.2.x config), and a CONTRIBUTING.md.
+
+Attach the UI mock (the screenshot) to the EPIC-UX epic and annotate it briefly with 5 improvement notes.
+
+Testing & CI
+
+Add CI tasks to wire up GitHub Actions for: build/test (unit), build Docker images, run Playwright E2E on a single test file. Provide reasonable estimates.
+
+Acceptance & handover
+
+Create an acceptance checklist issue that lists all acceptance criteria from the PRD and marks them as checkboxes. This issue must be linked to the release tag v0.1-mvp.
+
+How to use the API (follow API.md)
+
+Use the endpoints to create the project, epics, issues, subtasks, labels, attachments, and automations. Use the API fields to store estimates (use the estimate field if present) and the metadata field to store ACs and implementation checklists. If API.md requires JSON shape differences, adapt accordingly.
+
+If the API allows bulk creation, create project-plan.json that is the canonical source and use API bulk import. If not, create programmatically issue-by-issue and store the returned issue IDs in project-plan.json.
+
+Timelines & estimates (important)
+
+Do not use tiny nonsense estimates like 5–10 minutes. Break work into realistic short tasks: hours (4h, 8h) and days (1d, 2d). Keep individual task estimates small enough to be actionable (no >5 day single tasks).
+
+Create a milestone schedule with realistic phase windows: Scaffold (3–5 days), Core features (2–3 weeks), Testing & docs (1 week). Do not invent extremely long timelines; keep it practical for a small team.
+
+Deliverables inside the Jira project and the repo
+
+All epics, stories, subtasks, labels and automations created in the Jira clone.
+
+infra/planning/project-plan.json with the canonical export of created issues (IDs, titles, estimates, links).
+
+infra/planning/create_issues_from_plan.sh (or Node script) that can recreate the board using API and project-plan.json.
+
+docs/ skeleton issues created and attached to the EPIC-DOCS.
+
+A final comment on the project root with a short summary of what was created (+ list of top 10 issues) and how to re-run the create_issues_from_plan.sh.
+
+Reporting back to me (required)
+
+After you finish creating the project, post a short JSON summary in the project root comment containing:
+
+project_id, project_url, epic_ids, top_10_issue_ids, path_to_project_plan (repo path), and a short notes string describing any assumptions you made.
+
+Assumptions you can make (document them!)
+
+If user accounts do not exist, create issues unassigned and add a comment tagging role placeholders.
+
+If API does not provide a specific automation capability, add an issue under infra called Create automation: <description>.
+
+Finish when:
+
+All epics exist, top-level stories for each epic created with subtasks and estimates, project-plan.json committed to infra/planning/, and the final JSON summary posted in the project root.
+
+Do not proceed if you cannot access API.md or the PRD — instead return a single-line error explaining which file you could not locate.

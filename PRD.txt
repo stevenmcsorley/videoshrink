@@ -1,0 +1,340 @@
+Product Requirements Document — VideoShrink (working name)
+
+Goal / elevator pitch
+Build a modern, fast, self-hostable web app (Docker Compose) that lets users compress and transcode video files (many input formats) into much smaller outputs using FFmpeg. Frontend is React + TypeScript + Tailwind (older stable version to avoid new/TS incompatibilities). Backend handles uploads, queued transcoding jobs, storage, progress reporting, presets and an “advanced settings” panel like your screenshot. Focus on reliability, observability and privacy (option to self-host and store files locally or on S3-compatible storage).
+
+Success metrics
+
+95% of uploaded .mp4/.mov/.mkv files under 2GB successfully processed within reasonable time on a single worker (desktop VM).
+
+Median CPU time per 1GB input (720p → 720p compressed) under X minutes (depends on hardware) — track and optimize.
+
+End-to-end UX: user can upload and get a downloadable compressed file within 2 clicks + progress visible.
+
+Automated tests (E2E) cover upload → compress → download flows.
+
+Production readiness: supervisable via Docker Compose; logs + metrics + alerts configured.
+
+Users & personas
+
+Home user: quickly compress home videos to share by email.
+
+Content creator: batch compress multiple files preserving acceptable quality for social upload.
+
+Small media team: uses self-hosted instance to reduce storage and bandwidth costs.
+
+Developer / Ops: deploys with Docker Compose on a VPS or local machine; wants simple config and S3-compatible support.
+
+Core features (MVP)
+
+Upload UI — drag & drop, multi-file, file size limit, resumable upload support (tus or chunked).
+
+Presets & Advanced Settings — presets (High/Medium/Low), custom bitrate, target file size %, container, codec (H.264, H.265 if available), resolution, frame rate, subtitle options. (match screenshot layout).
+
+Queued Transcoding — upload → job queued into Redis → worker consumes job and runs FFmpeg. Support concurrent workers.
+
+Progress & Notifications — realtime job progress via WebSocket or Server-Sent Events. Email notifications optional.
+
+Storage — local disk + optional S3/MinIO backend. Temporary files auto-expire.
+
+Download / Preview — download final file; generate short preview thumbnail + low-res preview video.
+
+Authentication (optional) — token-based or simple username/password for shared installs. Guest mode for single-user home installs.
+
+Admin UI — queue view, history, job logs, retry/cancel, storage usage.
+
+Health & Logs — health endpoints, metrics (Prometheus), structured logs (JSON).
+
+Limits & Quotas — per-upload size limit, per-user concurrent jobs, retention policy.
+
+Nice-to-have (post-MVP)
+
+Browser-side (client) pre-processing (remux, simple re-encode) for tiny savings before upload.
+
+H265/AV1 encoding off-toggle depending on available libx265/AV1 builds and licensing.
+
+Auto-optimize to target output size (two-pass / CRF hybrid).
+
+Multi-tenant / team features.
+
+Mobile responsive UI + drag/drop fallback.
+
+Signed, time-limited public share links.
+
+Tech stack (recommended)
+
+Frontend: React + TypeScript, Vite, Tailwind CSS v2.2.x (older stable line to avoid TS & JIT issues)
+
+Backend API: Node.js (16+) + TypeScript, Express (or Fastify for perf)
+
+Job queue: BullMQ (Redis) or Bree if you want file-system-only job runner (BullMQ recommended)
+
+Worker: Node service that spawns ffmpeg (system binary) using child_process or uses fluent-ffmpeg wrapper (but calling binary directly gives more control)
+
+Storage: local disk (uploads/, outputs/) + optional MinIO (S3 API)
+
+DB: Postgres (production) or SQLite (single-user, small installs) for job metadata and users.
+
+Reverse proxy: nginx (optional) for TLS termination and static files.
+
+Observability: Prometheus + Grafana, Sentry for errors, Loki for logs (or plain file logs).
+
+Container/orchestration: Docker Compose for easy single-host deploys.
+
+Tests: Playwright (E2E) + Jest (unit) + supertest (API).
+
+CI/CD: GitHub Actions (build images, run tests).
+
+Security & privacy
+
+HTTPS via user-provided certs (nginx) or automatic Let’s Encrypt option (if public).
+
+Signed upload URLs when using direct (browser → storage) uploads.
+
+File scanning: run uploaded files through ClamAV (optional) before queuing.
+
+Rate limiting, per-IP or per-user quotas.
+
+Encrypt credentials via env vars / Docker secrets.
+
+Retention policy: configurable auto-delete after N days.
+
+No analytics by default; logging is server-side only.
+
+Architecture & data flow
+
+User uploads via frontend (chunked or whole). Upload stored in uploads/ (local) or directly to S3 with signed URL.
+
+Backend validates and creates Job record in DB, then pushes job to Redis queue.
+
+Worker picks job, moves file to processing/, runs FFmpeg commands to transcode (temporary files). Worker writes progress back to Redis and job logs to DB.
+
+When finished, output saved to outputs/ (or S3) and Job state = completed. Thumbnails/previews created. Temporary files removed.
+
+Frontend receives realtime progress via WebSocket/SSE and displays UI like your screenshot (progress bar, estimated time, logs).
+
+User clicks download link — served via nginx (X-Accel-Redirect) or pre-signed S3 URL.
+
+Example FFmpeg commands (implementable with variables)
+
+Target bitrate by % (single-pass, fast):
+ffmpeg -i input.mp4 -c:v libx264 -preset fast -b:v ${TARGET_BITRATE}k -maxrate ${TARGET_BITRATE}k -bufsize ${BUF} -c:a aac -b:a 128k -movflags +faststart output.mp4
+
+CRF two-pass for quality (slower, better):
+ffmpeg -y -i input.mp4 -c:v libx264 -preset medium -b:v ${BITRATE} -pass 1 -an -f mp4 /dev/null && ffmpeg -i input.mp4 -c:v libx264 -preset medium -b:v ${BITRATE} -pass 2 -c:a aac -b:a 128k output.mp4
+
+Target exact size (estimate & iterate) — implement a controller that calculates bitrate from desired size:
+target_bitrate = (target_bytes * 8) / duration_seconds - audio_bitrate
+then use ffmpeg with -b:v/two-pass.
+
+(Implementation note: offer presets using CRF (quality) and “target size” slider which converts to bitrate.)
+
+API spec (simplified)
+
+POST /api/upload
+
+multipart form or JSON with signed-url flow
+
+returns job id and upload token
+
+POST /api/jobs
+
+body: { uploadId, preset: 'medium' | 'high' | 'custom', codec, container, targetPercent?, maxWidth?, crf?, twoPass?:bool }
+
+returns job object
+
+GET /api/jobs/:id
+
+returns job status, progress, logs, outputs (download URL)
+
+DELETE /api/jobs/:id
+
+cancel and cleanup
+
+GET /api/presets
+
+list of presets
+
+Realtime: WebSocket /ws or SSE /events stream with job updates { jobId, progress, status, etaSeconds }.
+
+Docker Compose (outline)
+
+Below is an illustrative docker-compose.yml structure (condensed):
+
+version: "3.8"
+services:
+  frontend:
+    build: ./frontend
+    ports: ["3000:3000"]
+    environment:
+      - VITE_API_URL=http://backend:4000
+    depends_on: ["backend"]
+
+  backend:
+    build: ./backend
+    ports: ["4000:4000"]
+    environment:
+      - DATABASE_URL=postgres://... 
+      - REDIS_URL=redis://redis:6379
+      - STORAGE_TYPE=s3
+      - S3_ENDPOINT=http://minio:9000
+    volumes:
+      - uploads:/app/uploads
+    depends_on: ["redis","postgres","minio"]
+
+  worker:
+    build: ./worker
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - FFMPEG_PATH=/usr/bin/ffmpeg
+    volumes:
+      - uploads:/worker/uploads
+    depends_on: ["backend","redis"]
+
+  redis:
+    image: redis:6-alpine
+
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio
+    command: server /data
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    ports: ["9000:9000"]
+    volumes:
+      - miniodata:/data
+
+volumes:
+  uploads:
+  pgdata:
+  miniodata:
+
+
+Notes:
+
+Ensure FFmpeg is installed in the worker image (and backend if you call ffmpeg from there). Use lightweight jrottenberg/ffmpeg base or apt install ffmpeg in the worker image.
+
+For production, add nginx and TLS, make Postgres and Redis persistent, and tune resource limits.
+
+Developer experience & repo layout
+
+Mono-repo with /frontend, /backend, /worker, /infra (compose).
+
+frontend/ = React + Vite + TypeScript + Tailwind v2.2.x. Include components: Upload, JobList, JobDetail, Admin.
+
+backend/ = Express/Fastify + TypeScript, DB migrations (Knex or Prisma), API docs (OpenAPI).
+
+worker/ = Node TypeScript script that consumes queue and runs FFmpeg, writes status to DB/Redis.
+
+Shared library packages/common for types.
+
+UI / UX guidance (match screenshot vibe)
+
+Clean centered layout with large drag & drop area and a primary CTA button “Choose Files”.
+
+Advanced settings collapse panel beneath main upload area (like screenshot). Use sliders, select dropdowns, radio presets.
+
+Show human-friendly tips: "Target a file size as % (smaller values compress more)".
+
+Use subtle card shadows, rounded corners, larger clear CTA.
+
+Use Tailwind v2.2.x so developers avoid breaking changes while preserving utility classes and JIT compatibility.
+
+Accessibility: labels, keyboard navigation, aria-live for progress. Mobile responsive.
+
+Performance & scaling notes
+
+FFmpeg is CPU-bound. For batch operations, add more worker containers on beefier hosts.
+
+Use Redis to throttle concurrent ffmpeg processes per host to avoid OOM.
+
+Offload storage to S3/MinIO to avoid container disk usage spikes. Clean temp files aggressively.
+
+Monitoring & SLOs
+
+Metrics: queue length, job duration, worker CPU load, disk usage, failed jobs rate.
+
+Alerts: queue length > threshold, worker crash loop, disk > 80%.
+
+Log errors to Sentry; store job logs to DB for debugging.
+
+Testing strategy
+
+Unit tests: TS services and ffmpeg command generation.
+
+Integration: worker + mock ffmpeg (or dry-run mode) to verify flow.
+
+E2E: Playwright tests for upload → progress → download.
+
+Load test: k6 or Artillery to simulate large concurrent uploads and queueing.
+
+CI/CD & deployment
+
+GitHub Actions pipeline: lint, tests, build images, publish to registry.
+
+Deploy by pulling images on host and docker-compose pull && docker-compose up -d. Provide terraform/systemd service wrapper doc for production.
+
+Acceptance criteria (MVP)
+
+Upload + single-file compress using default preset works end-to-end on local Docker Compose.
+
+Worker logs show successful ffmpeg run; output file downloadable.
+
+Frontend shows progress (real time or periodic polling).
+
+Test coverage: unit + one E2E upload flow.
+
+Docs: README with quickstart (compose up), env vars list, and FFmpeg tuning guide.
+
+Milestones (suggested)
+
+Week 0 — Repo scaffold, Docker Compose, Node/React skeleton, Tailwind v2 setup.
+
+Week 1 — Upload flow + basic backend API + single worker ffmpeg local run (manual).
+
+Week 2 — Queue integration (Redis + BullMQ), job status + frontend progress.
+
+Week 3 — Presets, advanced UI, thumbnails/previews, storage options.
+
+Week 4 — Testing, metrics, admin UI and docs. Deployable MVP.
+
+Ops checklist (initial)
+
+Choose instance with enough CPU for expected throughput.
+
+Configure persistent volumes for uploads, outputs, DB.
+
+Set up Redis persistence and backups for DB.
+
+Configure HTTPS (nginx + certs).
+
+Set retention / cleanup cron.
+
+Risks & mitigations
+
+FFmpeg licensing / codec availability — H.265/AV1 may require extra libs; make them optional and document requirements.
+
+Large uploads — use resumable uploads and chunking to protect against failures.
+
+Disk exhaustion — implement quotas and monitoring.
+
+Performance variability — expose config to limit concurrency and worker count.
+
+Deliverables (repo contents)
+
+docker-compose.yml and infra/ for local dev.
+
+frontend/ React app (TypeScript + Tailwind v2.2.x).
+
+backend/ API and auth + OpenAPI spec.
+
+worker/ FFmpeg runner + progress reporting.
+
+docs/ with Quickstart, FFmpeg tuning, Env var reference, and upgrade procedure.
