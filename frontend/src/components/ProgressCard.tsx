@@ -8,10 +8,11 @@ import { useJobProgress } from '../hooks/useJobProgress';
 interface ProgressCardProps {
   jobId: number;
   fileName: string;
+  originalSize?: number;
   onComplete?: (outputFile: string) => void;
 }
 
-export default function ProgressCard({ jobId, fileName, onComplete }: ProgressCardProps) {
+export default function ProgressCard({ jobId, fileName, originalSize, onComplete }: ProgressCardProps) {
   const { progress, isConnected, error } = useJobProgress({
     jobId,
     onComplete: (data) => {
@@ -20,6 +21,27 @@ export default function ProgressCard({ jobId, fileName, onComplete }: ProgressCa
       }
     },
   });
+
+  const formatFileSize = (bytes: number): string => {
+    if (!bytes) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const calculateSavings = () => {
+    if (!originalSize || !progress?.outputSize) return null;
+    const saved = originalSize - progress.outputSize;
+    const percent = ((saved / originalSize) * 100).toFixed(1);
+    return {
+      bytes: saved,
+      percent,
+      formatted: formatFileSize(saved),
+    };
+  };
+
+  const savings = calculateSavings();
 
   const getStatusColor = () => {
     if (error || progress?.status === 'failed') return 'text-red-600';
@@ -118,6 +140,29 @@ export default function ProgressCard({ jobId, fileName, onComplete }: ProgressCa
       {(error || progress?.error) && (
         <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-red-800">{error || progress?.error}</p>
+        </div>
+      )}
+
+      {/* File Size Savings */}
+      {progress?.status === 'completed' && savings && savings.bytes > 0 && (
+        <div className="mt-4 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <svg className="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="text-sm font-medium text-gray-900">File Size Reduced</p>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  {formatFileSize(originalSize!)} → {formatFileSize(progress.outputSize!)}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-green-600">{savings.percent}%</p>
+              <p className="text-xs text-gray-600">Saved {savings.formatted}</p>
+            </div>
+          </div>
         </div>
       )}
 

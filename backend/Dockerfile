@@ -12,6 +12,9 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Generate Prisma Client
+RUN npx prisma generate
+
 # Build TypeScript
 RUN npm run build
 
@@ -20,11 +23,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files and prisma schema
 COPY package*.json ./
+COPY prisma ./prisma
 
 # Install production dependencies only
 RUN npm ci --only=production
+
+# Generate Prisma Client in production stage
+RUN npx prisma generate
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist

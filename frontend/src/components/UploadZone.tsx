@@ -17,6 +17,7 @@ interface Preset {
 interface Job {
   id: number;
   fileName: string;
+  fileSize: number;
   status: string;
 }
 
@@ -148,6 +149,7 @@ export default function UploadZone() {
         setJobs(prev => [...prev, {
           id: jobData.jobId,
           fileName: uploadFile.file.name,
+          fileSize: uploadFile.file.size,
           status: 'pending',
         }]);
       }
@@ -360,6 +362,7 @@ export default function UploadZone() {
                 key={job.id}
                 jobId={job.id}
                 fileName={job.fileName}
+                originalSize={job.fileSize}
               />
             ))}
           </div>

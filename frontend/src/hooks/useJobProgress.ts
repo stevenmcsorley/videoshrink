@@ -11,6 +11,7 @@ export interface JobProgress {
   phase?: string;
   error?: string;
   outputFile?: string;
+  outputSize?: number;
   timestamp: string;
 }
 

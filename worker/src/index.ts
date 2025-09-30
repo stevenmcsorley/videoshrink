@@ -129,12 +129,17 @@ const worker = new Worker<VideoJobData>(
       // Job completed successfully
       await job.updateProgress(100);
 
+      // Get output file size
+      const fs = await import('fs');
+      const outputSize = fs.existsSync(outputFile) ? fs.statSync(outputFile).size : null;
+
       await prisma.job.update({
         where: { id: jobId },
         data: {
           status: 'completed',
           progress: 100,
           outputFile: outputFile,
+          outputSize: outputSize,
           completedAt: new Date(),
         },
       });
@@ -147,6 +152,7 @@ const worker = new Worker<VideoJobData>(
           progress: 100,
           status: 'completed',
           outputFile,
+          outputSize,
           timestamp: new Date().toISOString(),
         })
       );
