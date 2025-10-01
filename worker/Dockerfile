@@ -22,7 +22,12 @@ RUN npx prisma generate
 # Build TypeScript
 RUN npm run build
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose no ports (worker doesn't need HTTP)
 
 # Run worker
-CMD ["npm", "run", "start"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["npm", "run", "dev"]

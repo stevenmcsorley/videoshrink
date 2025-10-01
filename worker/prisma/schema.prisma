@@ -2,7 +2,8 @@
 // Supports both PostgreSQL and SQLite
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -77,4 +78,39 @@ model FileUpload {
 
   @@map("file_uploads")
   @@index([expiresAt])
+}
+
+model ConversionJob {
+  id          Int       @id @default(autoincrement())
+  userId      Int?
+
+  // File information
+  inputFile   String    // Path to source file
+  outputFile  String?   // Path to converted file
+  fileName    String    // Original filename
+  fileSize    Int       // Original file size in bytes
+  outputSize  Int?      // Converted file size in bytes
+
+  // Conversion settings
+  fromFormat  String    // Source format extension (e.g., "mkv")
+  toFormat    String    // Target format extension (e.g., "mp4")
+  preset      String?   // Conversion preset (fast/balanced/high-quality/etc)
+  videoCodec  String?   // Video codec override
+  audioCodec  String?   // Audio codec override
+
+  // Job status
+  status      String    @default("pending") // pending, processing, completed, failed
+  progress    Float     @default(0.0)       // 0.0 to 100.0
+  error       String?   // Error message if failed
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  startedAt   DateTime? // When conversion started
+  completedAt DateTime? // When conversion completed
+
+  @@map("conversion_jobs")
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }

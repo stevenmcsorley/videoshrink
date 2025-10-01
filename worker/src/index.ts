@@ -2,6 +2,8 @@ import { Worker, Job } from 'bullmq';
 import { PrismaClient } from '@prisma/client';
 import { FFmpegGenerator } from './ffmpeg-generator.js';
 import { FFmpegExecutor } from './ffmpeg-executor.js';
+import { probeVideo } from './ffprobe.js';
+import { startConversionWorker } from './conversion-worker.js';
 import Redis from 'ioredis';
 import path from 'path';
 
@@ -50,13 +52,18 @@ const worker = new Worker<VideoJobData>(
         },
       });
 
+      // Probe input video to get metadata
+      console.log(`[Worker] Job ${jobId} - Probing input video...`);
+      const videoMetadata = await probeVideo(inputFile);
+      console.log(`[Worker] Job ${jobId} - Input: ${videoMetadata.width}x${videoMetadata.height}, ${videoMetadata.bitrate} kbps, ${videoMetadata.codec}`);
+
       // Generate output file path
       const outputFile = job.data.outputFile || inputFile.replace(/\.[^.]+$/, '_compressed.mp4');
 
       // Get preset configuration if specified
       const presetConfig = preset ? FFmpegGenerator.getPresetConfig(preset) : {};
 
-      // Generate FFmpeg commands
+      // Generate FFmpeg commands with actual input bitrate
       const commands = FFmpegGenerator.generate({
         inputFile,
         outputFile,
@@ -66,6 +73,7 @@ const worker = new Worker<VideoJobData>(
         bitrate,
         resolution,
         targetSizePercent: targetSize,
+        inputBitrate: videoMetadata.bitrate, // Pass actual bitrate from probe
         twoPass: presetConfig.twoPass || false,
       });
 
@@ -194,10 +202,13 @@ const worker = new Worker<VideoJobData>(
 
 // Worker event handlers
 worker.on('ready', () => {
-  console.log('✅ Worker is ready and waiting for jobs');
+  console.log('✅ Compression Worker is ready and waiting for jobs');
   console.log(`   Connected to Redis at ${redisConnection.host}:${redisConnection.port}`);
   console.log(`   Concurrency: ${worker.opts.concurrency}`);
 });
+
+// Start conversion worker
+const conversionWorker = startConversionWorker();
 
 worker.on('active', (job: Job) => {
   console.log(`[Worker] Job ${job.id} is now active`);

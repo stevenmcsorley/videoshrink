@@ -31,7 +31,7 @@ export default function UploadZone() {
 
   // Fetch presets on mount
   useEffect(() => {
-    fetch('http://localhost:4001/api/presets')
+    fetch('http://127.0.0.1:4001/api/presets')
       .then(res => res.json())
       .then(data => {
         if (data.presets) {
@@ -117,7 +117,7 @@ export default function UploadZone() {
         const formData = new FormData();
         formData.append('file', uploadFile.file);
 
-        const uploadRes = await fetch('http://localhost:4001/api/upload', {
+        const uploadRes = await fetch('http://127.0.0.1:4001/api/upload', {
           method: 'POST',
           body: formData,
         });
@@ -130,7 +130,7 @@ export default function UploadZone() {
         const fileId = uploadData.fileId;
 
         // Create compression job
-        const jobRes = await fetch('http://localhost:4001/api/jobs', {
+        const jobRes = await fetch('http://127.0.0.1:4001/api/jobs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

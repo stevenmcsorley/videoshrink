@@ -5,6 +5,7 @@ import uploadRoutes from './routes/upload.js';
 import jobRoutes from './routes/jobs.js';
 import progressRoutes from './routes/progress.js';
 import presetRoutes from './routes/presets.js';
+import convertRoutes from './routes/convert.js';
 
 const fastify = Fastify({
   logger: true,
@@ -29,6 +30,7 @@ await fastify.register(uploadRoutes);
 await fastify.register(jobRoutes);
 await fastify.register(progressRoutes);
 await fastify.register(presetRoutes);
+await fastify.register(convertRoutes);
 
 // Health check endpoint
 fastify.get('/health', async () => {

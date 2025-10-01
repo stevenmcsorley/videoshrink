@@ -12,6 +12,7 @@ export interface FFmpegOptions {
   bitrate?: string;
   resolution?: string;
   targetSizePercent?: number; // Target size as percentage (e.g., 50 = 50% of original)
+  inputBitrate?: number; // Actual input video bitrate in kbps (from ffprobe)
   audioCodec?: string;
   twoPass?: boolean;
 }
@@ -184,18 +185,29 @@ export class FFmpegGenerator {
 
   /**
    * Calculate target bitrate based on target size percentage
-   * This is a simplified calculation - real implementation would probe input file
+   * Uses actual input bitrate to calculate proportional target
    */
   private static calculateTargetBitrate(options: FFmpegOptions): string {
-    if (options.targetSizePercent) {
-      // Simplified: assume average video is 5 Mbps, scale by target percentage
-      const baseBitrate = 5000; // 5 Mbps in Kbps
-      const targetBitrate = Math.round(baseBitrate * (options.targetSizePercent / 100));
+    if (options.targetSizePercent && options.inputBitrate) {
+      // Calculate target bitrate proportional to input bitrate
+      // Apply 0.95 safety margin for container overhead
+      const targetBitrate = Math.round(options.inputBitrate * (options.targetSizePercent / 100) * 0.95);
+
+      // Ensure minimum quality - don't go below 500 kbps
+      const finalBitrate = Math.max(targetBitrate, 500);
+      return `${finalBitrate}k`;
+    }
+
+    // Fallback: if no input bitrate provided, use conservative default
+    // This should rarely happen as we now probe videos first
+    if (options.inputBitrate) {
+      // Use 70% of input bitrate as default compression
+      const targetBitrate = Math.round(options.inputBitrate * 0.7);
       return `${targetBitrate}k`;
     }
 
-    // Default to 2 Mbps
-    return '2000k';
+    // Last resort default to 1.5 Mbps (safer than previous 2 Mbps)
+    return '1500k';
   }
 
   /**

@@ -36,6 +36,11 @@ RUN npx prisma generate
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 4000
 
-CMD ["npm", "start"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["npm", "run", "dev"]

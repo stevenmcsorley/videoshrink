@@ -30,7 +30,7 @@ export default function JobsHistory() {
 
   const fetchJobs = async () => {
     try {
-      const res = await fetch('http://localhost:4001/api/jobs?limit=100');
+      const res = await fetch('http://127.0.0.1:4001/api/jobs?limit=100');
       const data = await res.json();
       setJobs(data.jobs);
     } catch (error) {
@@ -46,7 +46,7 @@ export default function JobsHistory() {
     }
 
     try {
-      const res = await fetch(`http://localhost:4001/api/jobs/${jobId}`, {
+      const res = await fetch(`http://127.0.0.1:4001/api/jobs/${jobId}`, {
         method: 'DELETE',
       });
 
@@ -210,7 +210,7 @@ export default function JobsHistory() {
                 <div className="flex flex-col space-y-2 ml-4">
                   {job.status === 'completed' && job.outputFile && (
                     <a
-                      href={`http://localhost:4001/api/jobs/${job.id}/download`}
+                      href={`http://127.0.0.1:4001/api/jobs/${job.id}/download`}
                       className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
                     >
                       <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
