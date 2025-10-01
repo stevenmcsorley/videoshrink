@@ -47,7 +47,7 @@ export const VideoTrimmer: React.FC = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://192.168.1.198:4001/api/upload', {
+      const response = await fetch('http://127.0.0.1:4001/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -80,7 +80,7 @@ export const VideoTrimmer: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://192.168.1.198:4001/api/trim', {
+      const response = await fetch('http://127.0.0.1:4001/api/trim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -110,7 +110,7 @@ export const VideoTrimmer: React.FC = () => {
   const pollJobStatus = async (jobId: number) => {
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`http://192.168.1.198:4001/api/trim/jobs/${jobId}`);
+        const response = await fetch(`http://127.0.0.1:4001/api/trim/jobs/${jobId}`);
         const data = await response.json();
 
         setCurrentJob(data.job);
@@ -134,7 +134,7 @@ export const VideoTrimmer: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://192.168.1.198:4001/api/trim/jobs/${currentJob.id}/download`
+        `http://127.0.0.1:4001/api/trim/jobs/${currentJob.id}/download`
       );
 
       if (!response.ok) {

@@ -30,8 +30,8 @@ export default function ConversionHistory() {
     try {
       const url =
         filter === 'all'
-          ? 'http://192.168.1.198:4001/api/convert/jobs'
-          : `http://192.168.1.198:4001/api/convert/jobs?status=${filter}`;
+          ? 'http://127.0.0.1:4001/api/convert/jobs'
+          : `http://127.0.0.1:4001/api/convert/jobs?status=${filter}`;
 
       const response = await fetch(url);
       const data = await response.json();
@@ -44,7 +44,7 @@ export default function ConversionHistory() {
   };
 
   const handleDownload = async (jobId: number) => {
-    window.open(`http://192.168.1.198:4001/api/convert/jobs/${jobId}/download`, '_blank');
+    window.open(`http://127.0.0.1:4001/api/convert/jobs/${jobId}/download`, '_blank');
   };
 
   const handleDelete = async (jobId: number) => {
@@ -53,7 +53,7 @@ export default function ConversionHistory() {
     }
 
     try {
-      await fetch(`http://192.168.1.198:4001/api/convert/jobs/${jobId}`, {
+      await fetch(`http://127.0.0.1:4001/api/convert/jobs/${jobId}`, {
         method: 'DELETE',
       });
       fetchJobs();
@@ -134,7 +134,7 @@ export default function ConversionHistory() {
                 {job.thumbnailPath && (
                   <div className="flex-shrink-0">
                     <img
-                      src={`http://192.168.1.198:4001/api/convert/jobs/${job.id}/thumbnail`}
+                      src={`http://127.0.0.1:4001/api/convert/jobs/${job.id}/thumbnail`}
                       alt={`${job.fileName} thumbnail`}
                       className="w-32 h-20 object-cover rounded border border-gray-200"
                       onError={(e) => {

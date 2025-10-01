@@ -171,7 +171,7 @@ export default function ProgressCard({ jobId, fileName, originalSize, onComplete
         <div className="mt-4 flex justify-end">
           <button
             onClick={() => {
-              window.location.href = `http://192.168.1.198:4001/api/jobs/${jobId}/download`;
+              window.location.href = `http://127.0.0.1:4001/api/jobs/${jobId}/download`;
             }}
             className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center"
           >
