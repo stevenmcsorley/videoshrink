@@ -54,7 +54,7 @@ export const GifCreator: React.FC = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://0.0.0.0:4001/api/upload', {
+      const response = await fetch('http://192.168.1.198:4001/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -89,7 +89,7 @@ export const GifCreator: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://0.0.0.0:4001/api/gif', {
+      const response = await fetch('http://192.168.1.198:4001/api/gif', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -121,7 +121,7 @@ export const GifCreator: React.FC = () => {
   const pollJobStatus = async (jobId: number) => {
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`http://0.0.0.0:4001/api/gif/jobs/${jobId}`);
+        const response = await fetch(`http://192.168.1.198:4001/api/gif/jobs/${jobId}`);
         const data = await response.json();
 
         setCurrentJob(data.job);
@@ -145,7 +145,7 @@ export const GifCreator: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://0.0.0.0:4001/api/gif/jobs/${currentJob.id}/download`
+        `http://192.168.1.198:4001/api/gif/jobs/${currentJob.id}/download`
       );
 
       if (!response.ok) {

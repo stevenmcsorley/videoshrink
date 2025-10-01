@@ -24,7 +24,7 @@ interface UseJobProgressOptions {
 
 export function useJobProgress({
   jobId,
-  apiUrl = 'http://0.0.0.0:4001',
+  apiUrl = 'http://192.168.1.198:4001',
   onComplete,
   onError,
 }: UseJobProgressOptions) {
