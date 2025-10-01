@@ -37,8 +37,8 @@ export default function FormatSelector({
     try {
       setLoading(true);
       const url = category
-        ? `http://127.0.0.1:4001/api/convert/formats?category=${category}`
-        : 'http://127.0.0.1:4001/api/convert/formats';
+        ? `http://0.0.0.0:4001/api/convert/formats?category=${category}`
+        : 'http://0.0.0.0:4001/api/convert/formats';
 
       const response = await fetch(url);
       const data = await response.json();

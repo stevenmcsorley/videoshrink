@@ -35,7 +35,7 @@ export const AudioExtractor: React.FC = () => {
 
   // Fetch available audio formats
   useEffect(() => {
-    fetch('http://127.0.0.1:4001/api/audio/formats')
+    fetch('http://0.0.0.0:4001/api/audio/formats')
       .then((res) => res.json())
       .then((data) => {
         setFormats(data.formats);
@@ -63,7 +63,7 @@ export const AudioExtractor: React.FC = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://127.0.0.1:4001/api/upload', {
+      const response = await fetch('http://0.0.0.0:4001/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -89,7 +89,7 @@ export const AudioExtractor: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://127.0.0.1:4001/api/audio/extract', {
+      const response = await fetch('http://0.0.0.0:4001/api/audio/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -118,7 +118,7 @@ export const AudioExtractor: React.FC = () => {
   const pollJobStatus = async (jobId: number) => {
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:4001/api/audio/jobs/${jobId}`);
+        const response = await fetch(`http://0.0.0.0:4001/api/audio/jobs/${jobId}`);
         const data = await response.json();
 
         setCurrentJob(data.job);
@@ -142,7 +142,7 @@ export const AudioExtractor: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:4001/api/audio/jobs/${currentJob.id}/download`
+        `http://0.0.0.0:4001/api/audio/jobs/${currentJob.id}/download`
       );
 
       if (!response.ok) {

@@ -24,7 +24,7 @@ export default function Converter() {
 
   const fetchPresets = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:4001/api/convert/presets');
+      const response = await fetch('http://0.0.0.0:4001/api/convert/presets');
       const data = await response.json();
       setPresets(data.presets || []);
     } catch (error) {
@@ -62,7 +62,7 @@ export default function Converter() {
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      const uploadResponse = await fetch('http://127.0.0.1:4001/api/upload', {
+      const uploadResponse = await fetch('http://0.0.0.0:4001/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -78,7 +78,7 @@ export default function Converter() {
       setConverting(true);
 
       // Step 2: Create conversion job
-      const jobResponse = await fetch('http://127.0.0.1:4001/api/convert/jobs', {
+      const jobResponse = await fetch('http://0.0.0.0:4001/api/convert/jobs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
