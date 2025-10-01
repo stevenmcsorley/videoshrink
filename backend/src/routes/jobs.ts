@@ -258,4 +258,51 @@ export default async function jobRoutes(fastify: FastifyInstance) {
       });
     }
   });
+
+  // GET /api/jobs/:id/thumbnail - Get job thumbnail
+  fastify.get('/api/jobs/:id/thumbnail', async (request, reply) => {
+    const { id } = request.params as { id: string };
+
+    try {
+      const job = await prisma.job.findUnique({
+        where: { id: parseInt(id) },
+      });
+
+      if (!job) {
+        return reply.code(404).send({
+          error: 'Job not found',
+          message: `No job found with ID: ${id}`,
+        });
+      }
+
+      if (!job.thumbnailPath) {
+        return reply.code(404).send({
+          error: 'Thumbnail not found',
+          message: 'No thumbnail available for this job',
+        });
+      }
+
+      // Check if thumbnail file exists
+      const fs = await import('fs');
+      if (!fs.existsSync(job.thumbnailPath)) {
+        return reply.code(404).send({
+          error: 'Thumbnail file not found',
+          message: 'The thumbnail file does not exist on the server',
+        });
+      }
+
+      // Send the thumbnail
+      reply.header('Content-Type', 'image/jpeg');
+      reply.header('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+
+      const stream = fs.createReadStream(job.thumbnailPath);
+      return reply.send(stream);
+    } catch (error: any) {
+      fastify.log.error(error);
+      return reply.code(500).send({
+        error: 'Failed to get thumbnail',
+        message: error.message,
+      });
+    }
+  });
 }

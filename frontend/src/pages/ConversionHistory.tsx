@@ -12,6 +12,7 @@ interface ConversionJob {
   outputSize: number | null;
   createdAt: string;
   completedAt: string | null;
+  thumbnailPath: string | null;
 }
 
 export default function ConversionHistory() {
@@ -128,7 +129,22 @@ export default function ConversionHistory() {
               key={job.id}
               className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-4">
+                {/* Thumbnail */}
+                {job.thumbnailPath && (
+                  <div className="flex-shrink-0">
+                    <img
+                      src={`http://127.0.0.1:4001/api/convert/jobs/${job.id}/thumbnail`}
+                      alt={`${job.fileName} thumbnail`}
+                      className="w-32 h-20 object-cover rounded border border-gray-200"
+                      onError={(e) => {
+                        // Hide thumbnail if it fails to load
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
                     <h3 className="font-semibold text-lg">{job.fileName}</h3>

@@ -103,6 +103,9 @@ model ConversionJob {
   progress    Float     @default(0.0)       // 0.0 to 100.0
   error       String?   // Error message if failed
 
+  // Metadata
+  thumbnailPath String? // Path to generated thumbnail (for video conversions)
+
   // Timestamps
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -110,6 +113,141 @@ model ConversionJob {
   completedAt DateTime? // When conversion completed
 
   @@map("conversion_jobs")
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AudioExtractionJob {
+  id          Int       @id @default(autoincrement())
+  userId      Int?
+
+  // File information
+  inputFile   String    // Path to source video file
+  outputFile  String?   // Path to extracted audio file
+  fileName    String    // Original filename
+  fileSize    Int       // Original file size in bytes
+  outputSize  Int?      // Extracted audio file size in bytes
+
+  // Audio extraction settings
+  outputFormat String   // Output audio format (mp3/aac/flac/etc)
+  audioCodec   String   // Audio codec to use
+  bitrate      String?  // Audio bitrate (e.g., "192k")
+
+  // Job status
+  status      String    @default("pending") // pending, processing, completed, failed
+  progress    Float     @default(0.0)       // 0.0 to 100.0
+  error       String?   // Error message if failed
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  startedAt   DateTime? // When extraction started
+  completedAt DateTime? // When extraction completed
+
+  @@map("audio_extraction_jobs")
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model TrimJob {
+  id          Int       @id @default(autoincrement())
+  userId      Int?
+
+  // File information
+  inputFile   String    // Path to source video file
+  outputFile  String?   // Path to trimmed video file
+  fileName    String    // Original filename
+  fileSize    Int       // Original file size in bytes
+  outputSize  Int?      // Trimmed video file size in bytes
+
+  // Trim settings
+  startTime   String    // Start time (HH:MM:SS or seconds)
+  endTime     String    // End time (HH:MM:SS or seconds)
+  duration    Float     // Duration of trimmed segment in seconds
+  lossless    Boolean   @default(true) // Use -c copy (no re-encoding)
+
+  // Job status
+  status      String    @default("pending") // pending, processing, completed, failed
+  progress    Float     @default(0.0)       // 0.0 to 100.0
+  error       String?   // Error message if failed
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  startedAt   DateTime? // When trim started
+  completedAt DateTime? // When trim completed
+
+  @@map("trim_jobs")
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model GifJob {
+  id          Int       @id @default(autoincrement())
+  userId      Int?
+
+  // File information
+  inputFile   String    // Path to source video file
+  outputFile  String?   // Path to generated GIF file
+  fileName    String    // Original filename
+  fileSize    Int       // Original file size in bytes
+  outputSize  Int?      // GIF file size in bytes
+
+  // GIF settings
+  startTime   String    @default("0") // Start time (HH:MM:SS or seconds)
+  endTime     String    // End time (HH:MM:SS or seconds)
+  duration    Float     // Duration of GIF in seconds
+  fps         Int       @default(10) // Frames per second (5-30)
+  width       Int       @default(480) // Width in pixels
+  optimize    Boolean   @default(true) // Use palette optimization
+
+  // Job status
+  status      String    @default("pending") // pending, processing, completed, failed
+  progress    Float     @default(0.0)       // 0.0 to 100.0
+  error       String?   // Error message if failed
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  startedAt   DateTime? // When GIF creation started
+  completedAt DateTime? // When GIF creation completed
+
+  @@map("gif_jobs")
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ThumbnailJob {
+  id          Int       @id @default(autoincrement())
+  userId      Int?
+
+  // File information
+  inputFile   String    // Path to source video file
+  outputFiles String?   // JSON array of thumbnail file paths
+  fileName    String    // Original filename
+  fileSize    Int       // Original file size in bytes
+
+  // Thumbnail settings
+  timestamps  String?   // JSON array of timestamps or null for auto-intervals
+  count       Int       @default(1) // Number of thumbnails to generate
+  width       Int       @default(320) // Width in pixels
+
+  // Job status
+  status      String    @default("pending") // pending, processing, completed, failed
+  progress    Float     @default(0.0)       // 0.0 to 100.0
+  error       String?   // Error message if failed
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  startedAt   DateTime? // When thumbnail generation started
+  completedAt DateTime? // When thumbnail generation completed
+
+  @@map("thumbnail_jobs")
   @@index([userId])
   @@index([status])
   @@index([createdAt])

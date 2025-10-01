@@ -72,7 +72,10 @@
       "Bash(docker exec:*)",
       "Bash(timeout:*)",
       "Bash(xargs sed:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker cp:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

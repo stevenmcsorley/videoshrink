@@ -17,6 +17,7 @@ interface Job {
   createdAt: string;
   completedAt: string | null;
   outputFile: string | null;
+  thumbnailPath: string | null;
 }
 
 export default function JobsHistory() {
@@ -149,7 +150,22 @@ export default function JobsHistory() {
         <div className="space-y-4">
           {filteredJobs.map(job => (
             <div key={job.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-4">
+                {/* Thumbnail */}
+                {job.thumbnailPath && (
+                  <div className="flex-shrink-0">
+                    <img
+                      src={`http://127.0.0.1:4001/api/jobs/${job.id}/thumbnail`}
+                      alt={`${job.fileName} thumbnail`}
+                      className="w-32 h-20 object-cover rounded border border-gray-200"
+                      onError={(e) => {
+                        // Hide thumbnail if it fails to load
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+
                 <div className="flex-1">
                   {/* File Name and Status */}
                   <div className="flex items-center mb-2">

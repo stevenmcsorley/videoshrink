@@ -3,15 +3,19 @@ import UploadZone from './components/UploadZone';
 import JobsHistory from './components/JobsHistory';
 import Converter from './pages/Converter';
 import ConversionHistory from './pages/ConversionHistory';
+import { AudioExtractor } from './components/AudioExtractor';
+import { VideoTrimmer } from './components/VideoTrimmer';
+import { GifCreator } from './components/GifCreator';
+import ThumbnailGenerator from './components/ThumbnailGenerator';
 
-type Page = 'upload' | 'history' | 'converter' | 'conversion-history';
+type Page = 'upload' | 'history' | 'converter' | 'conversion-history' | 'audio-extractor' | 'trimmer' | 'gif-creator' | 'thumbnail-generator';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('upload');
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <header className="mb-8 mt-6">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -25,10 +29,10 @@ function App() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex space-x-4 border-b border-gray-200">
+          <div className="flex space-x-4 border-b border-gray-200 overflow-x-auto">
             <button
               onClick={() => setCurrentPage('upload')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
                 currentPage === 'upload'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -43,7 +47,7 @@ function App() {
             </button>
             <button
               onClick={() => setCurrentPage('converter')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
                 currentPage === 'converter'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -57,8 +61,68 @@ function App() {
               </div>
             </button>
             <button
+              onClick={() => setCurrentPage('audio-extractor')}
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
+                currentPage === 'audio-extractor'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+                Audio Extractor
+              </div>
+            </button>
+            <button
+              onClick={() => setCurrentPage('trimmer')}
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
+                currentPage === 'trimmer'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                </svg>
+                Video Trimmer
+              </div>
+            </button>
+            <button
+              onClick={() => setCurrentPage('gif-creator')}
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
+                currentPage === 'gif-creator'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                GIF Creator
+              </div>
+            </button>
+            <button
+              onClick={() => setCurrentPage('thumbnail-generator')}
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
+                currentPage === 'thumbnail-generator'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Thumbnails
+              </div>
+            </button>
+            <button
               onClick={() => setCurrentPage('history')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
                 currentPage === 'history'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -73,7 +137,7 @@ function App() {
             </button>
             <button
               onClick={() => setCurrentPage('conversion-history')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
                 currentPage === 'conversion-history'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -92,6 +156,10 @@ function App() {
         <main className="bg-white rounded-lg shadow-lg p-8">
           {currentPage === 'upload' && <UploadZone />}
           {currentPage === 'converter' && <Converter />}
+          {currentPage === 'audio-extractor' && <AudioExtractor />}
+          {currentPage === 'trimmer' && <VideoTrimmer />}
+          {currentPage === 'gif-creator' && <GifCreator />}
+          {currentPage === 'thumbnail-generator' && <ThumbnailGenerator />}
           {currentPage === 'history' && <JobsHistory />}
           {currentPage === 'conversion-history' && <ConversionHistory />}
         </main>

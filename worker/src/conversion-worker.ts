@@ -6,6 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import { ConversionGenerator } from './conversion-generator.js';
 import { FFmpegExecutor } from './ffmpeg-executor.js';
 import { probeVideo } from './ffprobe.js';
+import { tryGenerateThumbnail } from './thumbnail-utils.js';
 import Redis from 'ioredis';
 import path from 'path';
 
@@ -106,6 +107,22 @@ export function startConversionWorker() {
         const stats = fs.statSync(outputFile);
         const outputSize = stats.size;
 
+        // Generate thumbnail automatically (only for video formats)
+        let thumbnailPath: string | null = null;
+        const videoFormats = ['mp4', 'mkv', 'avi', 'mov', 'webm', 'flv', 'm4v', 'mpg', 'mpeg', 'wmv'];
+        if (videoFormats.includes(toFormat.toLowerCase())) {
+          console.log(`[Conversion Worker] Job ${jobId} - Generating thumbnail...`);
+          thumbnailPath = await tryGenerateThumbnail({
+            inputFile: outputFile,
+            timestamp: '1',
+            width: 320,
+          });
+
+          if (thumbnailPath) {
+            console.log(`[Conversion Worker] Job ${jobId} - Thumbnail generated: ${thumbnailPath}`);
+          }
+        }
+
         // Update job to completed
         await prisma.conversionJob.update({
           where: { id: jobId },
@@ -114,6 +131,7 @@ export function startConversionWorker() {
             progress: 100,
             outputFile,
             outputSize,
+            thumbnailPath,
             completedAt: new Date(),
           },
         });

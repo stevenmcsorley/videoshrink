@@ -3,7 +3,12 @@ import { PrismaClient } from '@prisma/client';
 import { FFmpegGenerator } from './ffmpeg-generator.js';
 import { FFmpegExecutor } from './ffmpeg-executor.js';
 import { probeVideo } from './ffprobe.js';
+import { tryGenerateThumbnail } from './thumbnail-utils.js';
 import { startConversionWorker } from './conversion-worker.js';
+import { startAudioExtractionWorker } from './audio-worker.js';
+import { startTrimWorker } from './trim-worker.js';
+import { startGifWorker } from './gif-worker.js';
+import { startThumbnailWorker } from './thumbnail-worker.js';
 import Redis from 'ioredis';
 import path from 'path';
 
@@ -141,6 +146,18 @@ const worker = new Worker<VideoJobData>(
       const fs = await import('fs');
       const outputSize = fs.existsSync(outputFile) ? fs.statSync(outputFile).size : null;
 
+      // Generate thumbnail automatically
+      console.log(`[Worker] Job ${jobId} - Generating thumbnail...`);
+      const thumbnailPath = await tryGenerateThumbnail({
+        inputFile: outputFile, // Use compressed output for thumbnail
+        timestamp: '1',
+        width: 320,
+      });
+
+      if (thumbnailPath) {
+        console.log(`[Worker] Job ${jobId} - Thumbnail generated: ${thumbnailPath}`);
+      }
+
       await prisma.job.update({
         where: { id: jobId },
         data: {
@@ -148,6 +165,7 @@ const worker = new Worker<VideoJobData>(
           progress: 100,
           outputFile: outputFile,
           outputSize: outputSize,
+          thumbnailPath: thumbnailPath,
           completedAt: new Date(),
         },
       });
@@ -209,6 +227,18 @@ worker.on('ready', () => {
 
 // Start conversion worker
 const conversionWorker = startConversionWorker();
+
+// Start audio extraction worker
+const audioWorker = startAudioExtractionWorker();
+
+// Start trim worker
+const trimWorker = startTrimWorker();
+
+// Start GIF worker
+const gifWorker = startGifWorker();
+
+// Start thumbnail worker
+const thumbnailWorker = startThumbnailWorker();
 
 worker.on('active', (job: Job) => {
   console.log(`[Worker] Job ${job.id} is now active`);
