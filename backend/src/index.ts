@@ -59,7 +59,7 @@ fastify.setErrorHandler((error, request, reply) => {
 const start = async () => {
   try {
     const port = parseInt(process.env.PORT || '4001');
-    await fastify.listen({ port, host: '127.0.0.1' });
+    await fastify.listen({ port, host: '0.0.0.0' });
     console.log(`✅ Backend API running on http://localhost:${port}`);
     console.log(`📋 Health check: http://localhost:${port}/health`);
   } catch (err) {

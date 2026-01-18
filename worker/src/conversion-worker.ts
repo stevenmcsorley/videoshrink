@@ -97,14 +97,30 @@ export function startConversionWorker() {
         };
 
         // Execute the conversion
-        await executor.execute({
+        const result = await executor.execute({
           command: command.command,
           onProgress,
         });
 
+        if (!result.success) {
+          const stderrLines = result.stderr
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean);
+          const stderrTail = stderrLines.slice(-10).join('\n');
+          const message = result.error || 'FFmpeg conversion failed';
+          throw new Error(stderrTail ? `${message}\n${stderrTail}` : message);
+        }
+
         // Get output file size
         const fs = await import('fs');
+        if (!fs.existsSync(outputFile)) {
+          throw new Error('FFmpeg reported success but output file was not created');
+        }
         const stats = fs.statSync(outputFile);
+        if (stats.size === 0) {
+          throw new Error('FFmpeg reported success but output file is empty');
+        }
         const outputSize = stats.size;
 
         // Generate thumbnail automatically (only for video formats)

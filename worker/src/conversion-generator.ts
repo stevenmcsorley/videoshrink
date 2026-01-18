@@ -128,9 +128,20 @@ export class ConversionGenerator {
         command.push('-preset', presetConfig.encodingPreset);
       }
 
-      // Resolution
+      // Resolution and codec-specific constraints
+      const filters: string[] = [];
       if (resolution) {
-        command.push('-vf', `scale=${resolution}`);
+        const normalizedResolution = resolution.includes('x')
+          ? resolution.replace('x', ':')
+          : resolution;
+        filters.push(`scale=${normalizedResolution}`);
+      }
+      if (this.requiresEvenDimensions(vCodec)) {
+        // Ensure width/height are divisible by 2 for codecs like libx264
+        filters.push('scale=trunc(iw/2)*2:trunc(ih/2)*2');
+      }
+      if (filters.length > 0) {
+        command.push('-vf', filters.join(','));
       }
     }
 
@@ -245,6 +256,14 @@ export class ConversionGenerator {
     };
 
     return codecMap[ext];
+  }
+
+  /**
+   * Check if codec requires even dimensions (mod 2)
+   */
+  private static requiresEvenDimensions(codec: string): boolean {
+    const normalized = codec.toLowerCase();
+    return ['libx264', 'libx265', 'h264', 'hevc'].includes(normalized);
   }
 
   /**

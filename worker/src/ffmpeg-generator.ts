@@ -78,9 +78,9 @@ export class FFmpegGenerator {
       command.push('-crf', '23');
     }
 
-    // Resolution
-    if (options.resolution) {
-      command.push('-vf', `scale=${options.resolution}`);
+    const filters = this.buildVideoFilters(options.resolution, codecMap[codec]);
+    if (filters) {
+      command.push('-vf', filters);
     }
 
     // Audio codec
@@ -122,8 +122,9 @@ export class FFmpegGenerator {
     const bitrate = options.bitrate || this.calculateTargetBitrate(options);
     command.push('-b:v', bitrate);
 
-    if (options.resolution) {
-      command.push('-vf', `scale=${options.resolution}`);
+    const filters = this.buildVideoFilters(options.resolution, codecMap[codec]);
+    if (filters) {
+      command.push('-vf', filters);
     }
 
     // First pass options
@@ -163,8 +164,9 @@ export class FFmpegGenerator {
     const bitrate = options.bitrate || this.calculateTargetBitrate(options);
     command.push('-b:v', bitrate);
 
-    if (options.resolution) {
-      command.push('-vf', `scale=${options.resolution}`);
+    const filters = this.buildVideoFilters(options.resolution, codecMap[codec]);
+    if (filters) {
+      command.push('-vf', filters);
     }
 
     // Second pass options
@@ -249,6 +251,28 @@ export class FFmpegGenerator {
       width: parseInt(match[1]),
       height: parseInt(match[2]),
     };
+  }
+
+  private static buildVideoFilters(
+    resolution: string | undefined,
+    codec: string
+  ): string | null {
+    const filters: string[] = [];
+    if (resolution) {
+      const normalizedResolution = resolution.includes('x')
+        ? resolution.replace('x', ':')
+        : resolution;
+      filters.push(`scale=${normalizedResolution}`);
+    }
+    if (this.requiresEvenDimensions(codec)) {
+      filters.push('scale=trunc(iw/2)*2:trunc(ih/2)*2');
+    }
+    return filters.length > 0 ? filters.join(',') : null;
+  }
+
+  private static requiresEvenDimensions(codec: string): boolean {
+    const normalized = codec.toLowerCase();
+    return ['libx264', 'libx265', 'h264', 'hevc'].includes(normalized);
   }
 
   /**
