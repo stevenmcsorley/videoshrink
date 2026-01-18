@@ -2,7 +2,7 @@
 
 Self-hosted video compression and transcoding with a modern web UI. VideoShrink queues jobs via Redis, processes them with FFmpeg, and stores results locally or in S3-compatible storage.
 
-![VideoShrink UI](screenshot.gif)
+![VideoShrink UI](screenshot_xl.gif)
 
 ## Features
 
