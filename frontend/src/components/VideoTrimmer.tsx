@@ -183,7 +183,7 @@ export const VideoTrimmer: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">✂️ Video Trimmer</h2>
+        <h2 className="feature-title text-2xl font-bold mb-6">Video Trimmer</h2>
         <p className="text-gray-600 mb-6">
           Cut specific segments from your videos. Choose lossless mode for instant trimming without
           re-encoding.

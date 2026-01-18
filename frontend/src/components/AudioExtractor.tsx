@@ -173,7 +173,7 @@ export const AudioExtractor: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">🎵 Audio Extraction</h2>
+        <h2 className="feature-title text-2xl font-bold mb-6">Audio Extraction</h2>
         <p className="text-gray-600 mb-6">
           Extract audio from video files and convert to your preferred format
         </p>
@@ -239,11 +239,7 @@ export const AudioExtractor: React.FC = () => {
                 <button
                   key={bitrate}
                   onClick={() => setSelectedBitrate(bitrate)}
-                  className={`px-4 py-2 rounded border ${
-                    selectedBitrate === bitrate
-                      ? 'bg-blue-500 text-white border-blue-500'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
+                  className={`choice-pill ${selectedBitrate === bitrate ? 'choice-pill--active' : ''}`}
                 >
                   {bitrate}
                 </button>

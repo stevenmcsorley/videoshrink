@@ -209,7 +209,7 @@ const ThumbnailGenerator: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6">📸 Thumbnail Generator</h2>
+      <h2 className="feature-title text-3xl font-bold mb-6">Thumbnail Generator</h2>
 
       {/* Upload Form */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">

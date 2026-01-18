@@ -9,6 +9,7 @@ import { startAudioExtractionWorker } from './audio-worker.js';
 import { startTrimWorker } from './trim-worker.js';
 import { startGifWorker } from './gif-worker.js';
 import { startThumbnailWorker } from './thumbnail-worker.js';
+import { startFrameExtractionWorker } from './frame-extraction-worker.js';
 import Redis from 'ioredis';
 import path from 'path';
 
@@ -239,6 +240,9 @@ const gifWorker = startGifWorker();
 
 // Start thumbnail worker
 const thumbnailWorker = startThumbnailWorker();
+
+// Start frame extraction worker
+const frameWorker = startFrameExtractionWorker();
 
 worker.on('active', (job: Job) => {
   console.log(`[Worker] Job ${job.id} is now active`);

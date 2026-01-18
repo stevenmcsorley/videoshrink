@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install FFmpeg tools for ffprobe
+RUN apk add --no-cache ffmpeg
+
 # Copy package files
 COPY package*.json ./
 
@@ -22,6 +25,9 @@ RUN npm run build
 FROM node:20-alpine
 
 WORKDIR /app
+
+# Install FFmpeg tools for ffprobe
+RUN apk add --no-cache ffmpeg
 
 # Copy package files and prisma schema
 COPY package*.json ./

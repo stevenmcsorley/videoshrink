@@ -176,7 +176,7 @@ export const GifCreator: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">🎬 GIF Creator</h2>
+        <h2 className="feature-title text-2xl font-bold mb-6">GIF Creator</h2>
         <p className="text-gray-600 mb-6">
           Convert video clips to high-quality animated GIFs with custom settings
         </p>
@@ -262,11 +262,7 @@ export const GifCreator: React.FC = () => {
               <button
                 key={preset.value}
                 onClick={() => setWidth(preset.value)}
-                className={`px-4 py-2 rounded border ${
-                  width === preset.value
-                    ? 'bg-blue-500 text-white border-blue-500'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
+                className={`choice-pill ${width === preset.value ? 'choice-pill--active' : ''}`}
               >
                 {preset.label}
               </button>

@@ -10,6 +10,7 @@ import audioRoutes from './routes/audio.js';
 import trimRoutes from './routes/trim.js';
 import gifRoutes from './routes/gif.js';
 import thumbnailRoutes from './routes/thumbnail.js';
+import frameRoutes from './routes/frames.js';
 
 const fastify = Fastify({
   logger: true,
@@ -39,6 +40,7 @@ await fastify.register(audioRoutes);
 await fastify.register(trimRoutes);
 await fastify.register(gifRoutes);
 await fastify.register(thumbnailRoutes);
+await fastify.register(frameRoutes);
 
 // Health check endpoint
 fastify.get('/health', async () => {

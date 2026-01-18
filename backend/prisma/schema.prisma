@@ -252,3 +252,39 @@ model ThumbnailJob {
   @@index([status])
   @@index([createdAt])
 }
+
+model FrameExtractionJob {
+  id          Int       @id @default(autoincrement())
+  userId      Int?
+
+  // File information
+  inputFile   String    // Path to source video file
+  outputFiles String?   // JSON array of frame file paths
+  fileName    String    // Original filename
+  fileSize    Int       // Original file size in bytes
+
+  // Frame extraction settings
+  outputFormat   String  // jpg or png
+  fps            Float   @default(1)
+  startTime      String  @default("0") // Start time (HH:MM:SS or seconds)
+  endTime        String  // End time (HH:MM:SS or seconds)
+  duration       Float   // Duration of extraction segment in seconds
+  estimatedFrames Int    // Estimated number of frames
+  frameCount     Int?    // Actual number of frames generated
+
+  // Job status
+  status      String    @default("pending") // pending, processing, completed, failed
+  progress    Float     @default(0.0)       // 0.0 to 100.0
+  error       String?   // Error message if failed
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  startedAt   DateTime? // When extraction started
+  completedAt DateTime? // When extraction completed
+
+  @@map("frame_extraction_jobs")
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}

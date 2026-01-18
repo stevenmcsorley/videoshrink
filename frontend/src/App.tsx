@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './App.css';
 import UploadZone from './components/UploadZone';
 import JobsHistory from './components/JobsHistory';
 import Converter from './pages/Converter';
@@ -7,35 +8,33 @@ import { AudioExtractor } from './components/AudioExtractor';
 import { VideoTrimmer } from './components/VideoTrimmer';
 import { GifCreator } from './components/GifCreator';
 import ThumbnailGenerator from './components/ThumbnailGenerator';
+import FrameExtractor from './components/FrameExtractor';
 
-type Page = 'upload' | 'history' | 'converter' | 'conversion-history' | 'audio-extractor' | 'trimmer' | 'gif-creator' | 'thumbnail-generator';
+type Page = 'upload' | 'history' | 'converter' | 'conversion-history' | 'audio-extractor' | 'trimmer' | 'gif-creator' | 'thumbnail-generator' | 'frame-extractor';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('upload');
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-8 mt-6">
-          <div className="flex items-center justify-between mb-4">
+    <div className="app-shell">
+      <div className="app-viewport">
+        <header className="app-header">
+          <div className="app-brand">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                VideoShrink
-              </h1>
-              <p className="text-gray-600">
-                Compress your videos with ease using FFmpeg
-              </p>
+              <h1 className="app-title">VideoShrink</h1>
+              <p className="app-subtitle">Precision video workflows powered by FFmpeg</p>
+            </div>
+            <div className="app-meta">
+              <span className="app-chip">Local Processing</span>
+              <span className="app-chip app-chip--accent">FFmpeg Ready</span>
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex space-x-4 border-b border-gray-200 overflow-x-auto">
+          <nav className="app-nav">
             <button
               onClick={() => setCurrentPage('upload')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                currentPage === 'upload'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`nav-button ${
+                currentPage === 'upload' ? 'nav-button--active' : ''
               }`}
             >
               <div className="flex items-center">
@@ -47,10 +46,8 @@ function App() {
             </button>
             <button
               onClick={() => setCurrentPage('converter')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                currentPage === 'converter'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`nav-button ${
+                currentPage === 'converter' ? 'nav-button--active' : ''
               }`}
             >
               <div className="flex items-center">
@@ -62,10 +59,8 @@ function App() {
             </button>
             <button
               onClick={() => setCurrentPage('audio-extractor')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                currentPage === 'audio-extractor'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`nav-button ${
+                currentPage === 'audio-extractor' ? 'nav-button--active' : ''
               }`}
             >
               <div className="flex items-center">
@@ -77,10 +72,8 @@ function App() {
             </button>
             <button
               onClick={() => setCurrentPage('trimmer')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                currentPage === 'trimmer'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`nav-button ${
+                currentPage === 'trimmer' ? 'nav-button--active' : ''
               }`}
             >
               <div className="flex items-center">
@@ -92,10 +85,8 @@ function App() {
             </button>
             <button
               onClick={() => setCurrentPage('gif-creator')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                currentPage === 'gif-creator'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`nav-button ${
+                currentPage === 'gif-creator' ? 'nav-button--active' : ''
               }`}
             >
               <div className="flex items-center">
@@ -107,10 +98,8 @@ function App() {
             </button>
             <button
               onClick={() => setCurrentPage('thumbnail-generator')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                currentPage === 'thumbnail-generator'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`nav-button ${
+                currentPage === 'thumbnail-generator' ? 'nav-button--active' : ''
               }`}
             >
               <div className="flex items-center">
@@ -121,11 +110,22 @@ function App() {
               </div>
             </button>
             <button
+              onClick={() => setCurrentPage('frame-extractor')}
+              className={`nav-button ${
+                currentPage === 'frame-extractor' ? 'nav-button--active' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+                Frame Extractor
+              </div>
+            </button>
+            <button
               onClick={() => setCurrentPage('history')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                currentPage === 'history'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`nav-button ${
+                currentPage === 'history' ? 'nav-button--active' : ''
               }`}
             >
               <div className="flex items-center">
@@ -137,10 +137,8 @@ function App() {
             </button>
             <button
               onClick={() => setCurrentPage('conversion-history')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                currentPage === 'conversion-history'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`nav-button ${
+                currentPage === 'conversion-history' ? 'nav-button--active' : ''
               }`}
             >
               <div className="flex items-center">
@@ -150,21 +148,22 @@ function App() {
                 Convert History
               </div>
             </button>
-          </div>
+          </nav>
         </header>
 
-        <main className="bg-white rounded-lg shadow-lg p-8">
+        <main className="app-panel">
           {currentPage === 'upload' && <UploadZone />}
           {currentPage === 'converter' && <Converter />}
           {currentPage === 'audio-extractor' && <AudioExtractor />}
           {currentPage === 'trimmer' && <VideoTrimmer />}
           {currentPage === 'gif-creator' && <GifCreator />}
           {currentPage === 'thumbnail-generator' && <ThumbnailGenerator />}
+          {currentPage === 'frame-extractor' && <FrameExtractor />}
           {currentPage === 'history' && <JobsHistory />}
           {currentPage === 'conversion-history' && <ConversionHistory />}
         </main>
 
-        <footer className="mt-6 text-center text-sm text-gray-500">
+        <footer className="app-footer">
           <p>Powered by FFmpeg • Self-Hostable • Open Source</p>
         </footer>
       </div>

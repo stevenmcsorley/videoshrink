@@ -101,7 +101,7 @@ export default function JobsHistory() {
   return (
     <div className="w-full max-w-6xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Compression History</h2>
+        <h2 className="feature-title text-2xl font-bold mb-4">Compression History</h2>
 
         {/* Filter Tabs */}
         <div className="flex space-x-2 border-b border-gray-200">

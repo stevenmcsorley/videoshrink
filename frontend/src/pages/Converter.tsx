@@ -204,11 +204,7 @@ export default function Converter() {
             <button
               key={p.id}
               onClick={() => setPreset(p.id)}
-              className={`p-3 rounded-lg border-2 transition-colors ${
-                preset === p.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
+              className={`choice-pill choice-pill--block ${preset === p.id ? 'choice-pill--active' : ''}`}
             >
               <div className="font-semibold text-sm">{p.name}</div>
               <div className="text-xs text-gray-600 mt-1">{p.description}</div>

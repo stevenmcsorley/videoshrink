@@ -2,7 +2,7 @@
 
 Self-hosted video compression and transcoding with a modern web UI. VideoShrink queues jobs via Redis, processes them with FFmpeg, and stores results locally or in S3-compatible storage.
 
-![VideoShrink UI](<Screenshot from 2026-01-17 15-49-51.png>)
+![VideoShrink UI](screenshot.gif)
 
 ## Features
 
@@ -11,6 +11,7 @@ Self-hosted video compression and transcoding with a modern web UI. VideoShrink 
 - Audio extraction from video files.
 - Video trimming with start/end times.
 - GIF creation with size and quality options.
+- Frame extraction to JPG/PNG sequences with time range, FPS, and ZIP download.
 - Thumbnail generation for uploads and jobs.
 - Realtime progress tracking and job history.
 - Download endpoints for processed outputs.
